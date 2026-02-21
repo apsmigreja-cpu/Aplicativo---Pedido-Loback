@@ -197,34 +197,55 @@ export default function App() {
     const newOrderNum = generateOrderNumber();
     setOrderNumber(newOrderNum);
     
-    let message = `*PEDIDO #${newOrderNum} - LOBACK CONFECÇÕES*\n\n`;
-    message += `*DADOS DO CLIENTE*\n`;
-    message += `Nome: ${customer.name}\n`;
-    message += `CNPJ/IE: ${customer.cnpj} / ${customer.ie}\n`;
-    message += `Endereço: ${customer.address}, ${customer.neighborhood}\n`;
-    message += `Cidade/UF: ${customer.city} - ${customer.state}\n`;
-    message += `CEP: ${customer.zip}\n`;
-    message += `Email: ${customer.email}\n`;
-    message += `Telefone: ${customer.phone}\n\n`;
+    const separator = "------------------------------------------";
     
-    message += `*ITENS DO PEDIDO*\n`;
+    let message = `📦 *PEDIDO #${newOrderNum} - LOBACK CONFECÇÕES*\n`;
+    message += `${separator}\n\n`;
+    
+    message += `👤 *DADOS DO CLIENTE*\n`;
+    message += `• Nome: ${customer.name}\n`;
+    message += `• CNPJ/IE: ${customer.cnpj} / ${customer.ie}\n`;
+    message += `• Endereço: ${customer.address}, ${customer.neighborhood}\n`;
+    message += `• Cidade/UF: ${customer.city} - ${customer.state}\n`;
+    message += `• CEP: ${customer.zip}\n`;
+    message += `• Email: ${customer.email}\n`;
+    message += `• Telefone: ${customer.phone}\n\n`;
+    
+    message += `${separator}\n`;
+    message += `🛒 *ITENS DO PEDIDO*\n`;
+    message += `${separator}\n`;
+    
     cart.forEach(item => {
-      message += `- [${item.product.ref}] ${item.product.description} | Tam: ${item.size} | Qtd: ${item.quantity} dz | Duzia: R$ ${item.product.price.toFixed(2)} | Sub: R$ ${(item.product.price * item.quantity).toFixed(2)}\n`;
+      message += `✅ [REF: ${item.product.ref}] ${item.product.description}\n`;
+      message += `   Tam: ${item.size} | Qtd: ${item.quantity} dz\n`;
+      message += `   Vlr Dz: R$ ${item.product.price.toFixed(2)} | Sub: R$ ${(item.product.price * item.quantity).toFixed(2)}\n`;
+      message += `${separator}\n`;
     });
     
     const selectedOption = paymentOptions.find(opt => opt.id === paymentMethod);
-    message += `\n*FORMA DE PAGAMENTO: ${selectedOption?.label || 'Não informada'}*\n`;
+    message += `\n💰 *RESUMO DO PAGAMENTO*\n`;
+    message += `• Forma: ${selectedOption?.label || 'Não informada'}\n`;
     
     if (paymentMethod === 'avista') {
-      message += `Subtotal: R$ ${totalValue.toFixed(2)}\n`;
-      message += `Desconto (6%): R$ ${(totalValue * 0.06).toFixed(2)}\n`;
+      message += `• Subtotal: R$ ${totalValue.toFixed(2)}\n`;
+      message += `• Desconto (6%): R$ ${(totalValue * 0.06).toFixed(2)}\n`;
     }
     
-    message += `*TOTAL FINAL: R$ ${finalTotal.toFixed(2)}*\n`;
+    message += `• *TOTAL FINAL: R$ ${finalTotal.toFixed(2)}*\n\n`;
+    message += `${separator}\n`;
 
     if (observations.trim()) {
-      message += `\n*OBSERVAÇÕES:*\n${observations}\n`;
+      message += `\n📝 *OBSERVAÇÕES:*\n${observations}\n\n`;
+      message += `${separator}\n`;
     }
+    
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('pt-BR');
+    const formattedTime = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    
+    message += `_Gerado por Pedro Pimenta Representações_\n`;
+    message += `_By Loback Confecções_\n`;
+    message += `_Data: ${formattedDate} às ${formattedTime}_`;
     
     // WhatsApp
     const encodedMessage = encodeURIComponent(message);
@@ -232,7 +253,7 @@ export default function App() {
 
     // Email
     const emailSubject = `Pedido #${newOrderNum} - Loback Confecções - ${customer.name}`;
-    const emailBody = message.replace(/\*/g, ''); // Remove markdown bold for email
+    const emailBody = message.replace(/\*/g, '').replace(/_/g, ''); // Remove markdown formatting for email
     const mailtoLink = `mailto:${representativeEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
     
     // Small delay to ensure WhatsApp window starts opening
