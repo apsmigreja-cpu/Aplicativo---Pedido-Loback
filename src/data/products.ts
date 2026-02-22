@@ -1,8 +1,8 @@
 import { Product } from '../types';
 
 export const products: Product[] = [
-  { ref: "02", description: "CUECA AD. EL. EXP. LATERAL RIB - PVC", sizes: ["P", "M", "G", "GG"], price: 75.60, imageUrl: "https://picsum.photos/seed/ref02/400/400" },
-  { ref: "03", description: "CUECA FEMININA EL. LOBACK", sizes: ["P", "M", "G", "GG"], price: 68.64, imageUrl: "./REF03.jpg" },
+  { ref: "02", description: "CUECA AD. EL. EXP. LATERAL RIB - PVC", sizes: ["P", "M", "G", "GG"], price: 75.60, imageUrl: "REF02.jpg" },
+  { ref: "03", description: "CUECA FEMININA EL. LOBACK", sizes: ["P", "M", "G", "GG"], price: 68.64, imageUrl: "REF03.jpg" },
   { ref: "04", description: "FIO DENTAL LOBACK", sizes: ["P", "M", "G", "GG"], price: 62.64, imageUrl: "REF04.jpg" },
   { ref: "05", description: "TANGÃO COTTON", sizes: ["M", "G", "GG"], price: 64.80, imageUrl: "REF05.jpg" },
   { ref: "06", description: "TANGA NOVA COTTON 4%", sizes: ["P", "M", "G", "GG"], price: 50.04, imageUrl: "REF06.jpg" },
@@ -101,7 +101,7 @@ export const products: Product[] = [
 { ref: "406", description: "CONJUNTO MARIAH", sizes: ["P", "M", "G", "GG"], price: 246.24, imageUrl: "REF406.jpg" },
 { ref: "407", description: "CUECA SAMBA CANÇÃO ADULTO - PVC", sizes: ["P", "M", "G", "GG"], price: 171.60, imageUrl: "REF407.jpg" },
 { ref: "408", description: "TOP XIQUE XIQUE - CABIDE", sizes: ["P", "M", "G", "GG"], price: 99.96, imageUrl: "REF408.jpg" },
-{ ref: "409", description: "CUECA SAMBA CANÇÃO JUVENIL - PVC", sizes: ["P", "M", "G", "GG"], price: 142.56, imageUrl: "REF409.jpg" },
+{ ref: "409", description: "CUECA SAMBA CANÇÃO JUVENIL - PVC", sizes: ["P", "M", "G", "GG"], price: 142.56, imageUrl: "REF0409.jpg" },
 { ref: "410", description: "CONJUNTO MAIS BONITA", sizes: ["P", "M", "G", "GG"], price: 159.84, imageUrl: "REF410.jpg" },
 { ref: "411", description: "TOP TOMARA QUE CAI TATI", sizes: ["P", "M", "G", "GG"], price: 78.12, imageUrl: "REF411.jpg" },
 { ref: "414", description: "TOP NADADOR HELÔ", sizes: ["P", "M", "G", "GG"], price: 134.40, imageUrl: "REF414.jpg" },

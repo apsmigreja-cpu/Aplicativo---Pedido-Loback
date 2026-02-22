@@ -28,6 +28,13 @@ import {
 import { products } from './data/products';
 import { CustomerInfo, CartItem, Product } from './types';
 
+const getImageUrl = (url?: string) => {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  const cleanUrl = url.startsWith('/') ? url.slice(1) : url;
+  return `${import.meta.env.BASE_URL}${cleanUrl}`;
+};
+
 const STEPS = {
   CUSTOMER_INFO: 'customer_info',
   PRODUCT_SELECTION: 'product_selection',
@@ -740,7 +747,7 @@ export default function App() {
                   {selectedProductImage.imageUrl ? (
                     <div className="relative w-full h-full flex items-center justify-center">
                       <img 
-                        src={selectedProductImage.imageUrl} 
+                        src={getImageUrl(selectedProductImage.imageUrl)} 
                         alt={selectedProductImage.description}
                         className="max-w-full max-h-[60vh] object-contain rounded-xl shadow-md"
                         onError={(e) => {
@@ -865,7 +872,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd, onViewImage }
           {product.imageUrl ? (
             <>
               <img 
-                src={product.imageUrl} 
+                src={getImageUrl(product.imageUrl)} 
                 alt={product.description}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-110"
                 onError={(e) => {
