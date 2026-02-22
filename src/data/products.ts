@@ -1,14 +1,14 @@
 import { Product } from '../types';
 
 export const products: Product[] = [
-  { ref: "02", description: "CUECA AD. EL. EXP. LATERAL RIB - PVC", sizes: ["P", "M", "G", "GG"], price: 75.60 },
-  { ref: "03", description: "CUECA FEMININA EL. LOBACK", sizes: ["P", "M", "G", "GG"], price: 68.64 },
-  { ref: "04", description: "FIO DENTAL LOBACK", sizes: ["P", "M", "G", "GG"], price: 62.64 },
-  { ref: "05", description: "TANGÃO COTTON", sizes: ["M", "G", "GG"], price: 64.80 },
-  { ref: "06", description: "TANGA NOVA COTTON 4%", sizes: ["P", "M", "G", "GG"], price: 50.04 },
-  { ref: "07", description: "TANGA COTON 8%", sizes: ["P", "M", "G", "GG"], price: 61.80 },
-  { ref: "08", description: "CALÇOLINHA JU-JU", sizes: ["P", "M", "G", "GG"], price: 50.40 },
-  { ref: "09", description: "TANGA BILÚ (COTTON)", sizes: ["P", "M", "G", "GG"], price: 60.96 },
+  { ref: "02", description: "CUECA AD. EL. EXP. LATERAL RIB - PVC", sizes: ["P", "M", "G", "GG"], price: 75.60, imageUrl: "https://picsum.photos/seed/ref02/800/800" },
+  { ref: "03", description: "CUECA FEMININA EL. LOBACK", sizes: ["P", "M", "G", "GG"], price: 68.64, imageUrl: "https://picsum.photos/seed/ref03/800/800" },
+  { ref: "04", description: "FIO DENTAL LOBACK", sizes: ["P", "M", "G", "GG"], price: 62.64, imageUrl: "https://picsum.photos/seed/ref04/800/800" },
+  { ref: "05", description: "TANGÃO COTTON", sizes: ["M", "G", "GG"], price: 64.80, imageUrl: "https://picsum.photos/seed/ref05/800/800" },
+  { ref: "06", description: "TANGA NOVA COTTON 4%", sizes: ["P", "M", "G", "GG"], price: 50.04, imageUrl: "https://picsum.photos/seed/ref06/800/800" },
+  { ref: "07", description: "TANGA COTON 8%", sizes: ["P", "M", "G", "GG"], price: 61.80, imageUrl: "https://picsum.photos/seed/ref07/800/800" },
+  { ref: "08", description: "CALÇOLINHA JU-JU", sizes: ["P", "M", "G", "GG"], price: 50.40, imageUrl: "https://picsum.photos/seed/ref08/800/800" },
+  { ref: "09", description: "TANGA BILÚ (COTTON)", sizes: ["P", "M", "G", "GG"], price: 60.96, imageUrl: "https://picsum.photos/seed/ref09/800/800" },
   { ref: "011", description: "CUECA AD. MASC. COM RECORTE-PVC", sizes: ["P", "M", "G", "GG"], price: 66.96 },
   { ref: "012", description: "CUECA JUVENIL- PVC", sizes: ["P", "M", "G"], price: 58.20 },
   { ref: "013", description: "CUECA INFANTIL ELÁST. EXPOSTO - PVC", sizes: ["P", "M", "G"], price: 51.96 },

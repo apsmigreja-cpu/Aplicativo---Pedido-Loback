@@ -21,7 +21,9 @@ import {
   ChevronLeft,
   CheckCircle2,
   Package,
-  LogOut
+  LogOut,
+  Eye,
+  X
 } from 'lucide-react';
 import { products } from './data/products';
 import { CustomerInfo, CartItem, Product } from './types';
@@ -52,6 +54,7 @@ export default function App() {
   const [paymentMethod, setPaymentMethod] = useState<string>('');
   const [orderNumber, setOrderNumber] = useState<string>('');
   const [observations, setObservations] = useState<string>('');
+  const [selectedProductImage, setSelectedProductImage] = useState<Product | null>(null);
 
   const generateOrderNumber = () => {
     return Math.floor(1000 + Math.random() * 9000).toString();
@@ -399,7 +402,12 @@ export default function App() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredProducts.map((product) => (
-                  <ProductCard key={product.ref} product={product} onAdd={addToCart} />
+                  <ProductCard 
+                    key={product.ref} 
+                    product={product} 
+                    onAdd={addToCart} 
+                    onViewImage={setSelectedProductImage} 
+                  />
                 ))}
               </div>
 
@@ -622,6 +630,79 @@ export default function App() {
         </AnimatePresence>
       </main>
 
+      {/* Image Modal */}
+      <AnimatePresence>
+        {selectedProductImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => setSelectedProductImage(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative max-w-4xl w-full bg-white rounded-3xl overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setSelectedProductImage(null)}
+                className="absolute top-4 right-4 z-10 p-2 bg-white/90 hover:bg-white rounded-full text-[#1a1a1a] transition-all shadow-lg"
+              >
+                <X size={24} />
+              </button>
+              
+              <div className="flex flex-col md:flex-row">
+                <div className="md:w-1/2 bg-[#f5f5f0] flex items-center justify-center p-8">
+                  {selectedProductImage.imageUrl ? (
+                    <img 
+                      src={selectedProductImage.imageUrl} 
+                      alt={selectedProductImage.description}
+                      className="max-w-full max-h-[60vh] object-contain rounded-xl shadow-md"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="w-full aspect-square bg-[#e6e6e1] rounded-xl flex flex-col items-center justify-center text-[#5A5A40]/40 gap-2">
+                      <Package size={48} />
+                      <p className="text-xs font-bold uppercase tracking-widest">Imagem não disponível</p>
+                    </div>
+                  )}
+                </div>
+                <div className="md:w-1/2 p-8 space-y-6">
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-bold bg-[#f5f5f0] px-2 py-0.5 rounded uppercase opacity-60">Ref: {selectedProductImage.ref}</span>
+                    <h2 className="font-serif text-3xl font-bold">{selectedProductImage.description}</h2>
+                    <p className="text-2xl font-serif font-bold text-[#5A5A40]">R$ {selectedProductImage.price.toFixed(2)} <span className="text-xs opacity-40 uppercase font-sans">/ Dúzia</span></p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <p className="text-[10px] uppercase tracking-wider font-bold opacity-40">Tamanhos Disponíveis</p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedProductImage.sizes.map(size => (
+                        <span key={size} className="px-4 py-2 bg-[#f5f5f0] rounded-xl text-xs font-bold">
+                          {size}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-6 border-t border-[#1a1a1a]/5">
+                    <button
+                      onClick={() => setSelectedProductImage(null)}
+                      className="w-full bg-[#5A5A40] text-white py-4 rounded-full font-medium hover:bg-[#4a4a34] transition-all shadow-lg shadow-[#5A5A40]/20"
+                    >
+                      Fechar Visualização
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <footer className="max-w-4xl mx-auto px-4 py-12 border-t border-[#1a1a1a]/5 text-center space-y-6">
         <div className="flex flex-col items-center justify-center gap-1">
           <h2 className="text-sm font-bold tracking-tight">Pedro Pimenta</h2>
@@ -673,17 +754,27 @@ const Input: React.FC<InputProps> = ({ label, icon, required, ...props }) => {
 interface ProductCardProps {
   product: Product;
   onAdd: (p: Product, s: string, q: number) => void;
+  onViewImage: (p: Product) => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd, onViewImage }) => {
   const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
   const [quantity, setQuantity] = useState(0);
 
   return (
-    <div className="bg-white rounded-3xl p-5 sm:p-6 border border-[#1a1a1a]/5 hover:shadow-md transition-shadow flex flex-col gap-4">
+    <div className="bg-white rounded-3xl p-5 sm:p-6 border border-[#1a1a1a]/5 hover:shadow-md transition-shadow flex flex-col gap-4 group">
       <div className="flex flex-col sm:flex-row justify-between items-start gap-2 sm:gap-4">
         <div className="space-y-1">
-          <span className="text-[10px] font-bold bg-[#f5f5f0] px-2 py-0.5 rounded uppercase opacity-60">Ref: {product.ref}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold bg-[#f5f5f0] px-2 py-0.5 rounded uppercase opacity-60">Ref: {product.ref}</span>
+            <button 
+              onClick={() => onViewImage(product)}
+              className="text-[#5A5A40] hover:text-[#4a4a34] flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider transition-colors"
+            >
+              <Eye size={12} />
+              Ver Imagem
+            </button>
+          </div>
           <h3 className="font-medium leading-tight text-sm sm:text-base">{product.description}</h3>
         </div>
         <div className="text-left sm:text-right">

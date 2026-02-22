@@ -3,6 +3,7 @@ export interface Product {
   description: string;
   sizes: string[];
   price: number;
+  imageUrl?: string;
 }
 
 export interface CustomerInfo {
