@@ -743,7 +743,6 @@ export default function App() {
                         src={selectedProductImage.imageUrl} 
                         alt={selectedProductImage.description}
                         className="max-w-full max-h-[60vh] object-contain rounded-xl shadow-md"
-                        referrerPolicy="no-referrer"
                         onError={(e) => {
                           const target = e.currentTarget;
                           target.style.display = 'none';
@@ -869,7 +868,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd, onViewImage }
                 src={product.imageUrl} 
                 alt={product.description}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-110"
-                referrerPolicy="no-referrer"
                 onError={(e) => {
                   const target = e.currentTarget;
                   target.style.display = 'none';
