@@ -113,7 +113,7 @@ export const products: Product[] = [
 { ref: "503", description: "SHORT CURTO POLIAMIDA CRIS", sizes: ["P", "M", "G", "GG"], price: 126.00, imageUrl: "/REF503.jpg" },
 { ref: "1001", description: "PIJAMA MANGA LONGA", sizes: ["P", "M", "G", "GG"], price: 576.00, imageUrl: "/REF1001.jpg" },
 { ref: "1002", description: "SHORTS DOOL", sizes: ["P", "M", "G", "GG"], price: 196.80, imageUrl: "/REF1002.jpg" },
-{ ref: "1002-B", description: "SHORTS DOOL -PLUS SIZE", sizes: ["48", "50", "52"], price: 252.60, imageUrl: "/REF1002.jpg" },
+{ ref: "1002-B", description: "SHORTS DOOL -PLUS SIZE", sizes: ["48", "50", "52"], price: 252.60, imageUrl: "/REF1002-B.jpg" },
 { ref: "1003", description: "PIJAMA AURORA", sizes: ["P", "M", "G", "GG"], price: 439.20, imageUrl: "/REF1003.jpg" },
 { ref: "1004", description: "SHORT DOLL LUIZA", sizes: ["P", "M", "G", "GG"], price: 276.00, imageUrl: "/REF1004.jpg" },
 { ref: "1018", description: "CAMISOLA JULIANA", sizes: ["P", "M", "G", "GG"], price: 238.80, imageUrl: "/REF1018.jpg" }

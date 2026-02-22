@@ -49,12 +49,26 @@ export default function App() {
     email: '',
     phone: ''
   });
+  const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<string>('');
   const [orderNumber, setOrderNumber] = useState<string>('');
   const [observations, setObservations] = useState<string>('');
   const [selectedProductImage, setSelectedProductImage] = useState<Product | null>(null);
+
+  const categories = ['Todas', 'Cuecas', 'Tangas & Fios', 'Calçolas & Calças', 'Conjuntos & Tops', 'Fitness', 'Pijamas & Noite'];
+
+  const getProductCategory = (description: string) => {
+    const desc = description.toLowerCase();
+    if (desc.includes('cueca') || desc.includes('sungão')) return 'Cuecas';
+    if (desc.includes('tanga') || desc.includes('fio dental')) return 'Tangas & Fios';
+    if (desc.includes('calçola') || desc.includes('calça') || desc.includes('tangão')) return 'Calçolas & Calças';
+    if (desc.includes('conjunto') || desc.includes('top') || desc.includes('soutien')) return 'Conjuntos & Tops';
+    if (desc.includes('fitness') || desc.includes('short') || desc.includes('camiseta') || desc.includes('fusô')) return 'Fitness';
+    if (desc.includes('pijama') || desc.includes('camisola') || desc.includes('doll')) return 'Pijamas & Noite';
+    return 'Outros';
+  };
 
   const generateOrderNumber = () => {
     return Math.floor(1000 + Math.random() * 9000).toString();
@@ -101,11 +115,12 @@ export default function App() {
   }, [customer]);
 
   const filteredProducts = useMemo(() => {
-    return products.filter(p => 
-      p.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.ref.includes(searchTerm)
-    );
-  }, [searchTerm]);
+    return products.filter(p => {
+      const matchesSearch = p.description.toLowerCase().includes(searchTerm.toLowerCase()) || p.ref.includes(searchTerm);
+      const matchesCategory = selectedCategory === 'Todas' || getProductCategory(p.description) === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchTerm, selectedCategory]);
 
   const totalValue = useMemo(() => {
     return cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
@@ -362,41 +377,60 @@ export default function App() {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-6"
             >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-start gap-4">
-                  <button 
-                    onClick={() => setStep(STEPS.CUSTOMER_INFO)}
-                    className="mt-1 p-2 hover:bg-white rounded-full transition-colors"
-                    title="Voltar para informações do cliente"
-                  >
-                    <ChevronLeft size={24} />
-                  </button>
-                  <div className="space-y-1">
-                    <h2 className="font-serif text-3xl font-light">Catálogo de Produtos</h2>
-                    <p className="text-sm opacity-60">Selecione os itens e tamanhos desejados (Venda por Dúzia)</p>
+              <div className="space-y-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <button 
+                      onClick={() => setStep(STEPS.CUSTOMER_INFO)}
+                      className="mt-1 p-2 hover:bg-white rounded-full transition-colors"
+                      title="Voltar para informações do cliente"
+                    >
+                      <ChevronLeft size={24} />
+                    </button>
+                    <div className="space-y-1">
+                      <h2 className="font-serif text-3xl font-light">Catálogo de Produtos</h2>
+                      <p className="text-sm opacity-60">Selecione os itens e tamanhos desejados (Venda por Dúzia)</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleExit();
+                      }}
+                      className="flex items-center gap-2 bg-white text-[#5A5A40] border border-[#5A5A40]/20 px-4 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[#5A5A40] hover:text-white transition-all shadow-sm"
+                    >
+                      <LogOut size={14} />
+                      Sair
+                    </button>
+                    <div className="relative flex-1 md:flex-none">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 opacity-40" size={18} />
+                      <input
+                        type="text"
+                        placeholder="Buscar..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-12 pr-4 py-3 bg-white rounded-full border border-[#1a1a1a]/10 w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-[#5A5A40]/20 transition-all text-sm"
+                      />
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleExit();
-                    }}
-                    className="flex items-center gap-2 bg-white text-[#5A5A40] border border-[#5A5A40]/20 px-4 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[#5A5A40] hover:text-white transition-all shadow-sm"
-                  >
-                    <LogOut size={14} />
-                    Sair
-                  </button>
-                  <div className="relative flex-1 md:flex-none">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 opacity-40" size={18} />
-                    <input
-                      type="text"
-                      placeholder="Buscar..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-12 pr-4 py-3 bg-white rounded-full border border-[#1a1a1a]/10 w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-[#5A5A40]/20 transition-all text-sm"
-                    />
-                  </div>
+
+                {/* Categories */}
+                <div className="flex overflow-x-auto pb-2 gap-2 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+                  {categories.map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold transition-all border ${
+                        selectedCategory === cat
+                          ? 'bg-[#5A5A40] text-white border-[#5A5A40] shadow-md'
+                          : 'bg-white text-[#1a1a1a] border-[#1a1a1a]/10 hover:border-[#5A5A40]/30'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -411,15 +445,33 @@ export default function App() {
                 ))}
               </div>
 
-              <div className="sticky bottom-8 flex justify-center">
-                <button
-                  onClick={() => setStep(STEPS.CART_REVIEW)}
-                  className="bg-[#5A5A40] text-white px-12 py-4 rounded-full font-medium flex items-center gap-2 hover:bg-[#4a4a34] transition-all shadow-xl shadow-[#5A5A40]/30"
+              {/* Floating Cart Summary */}
+              {cart.length > 0 && (
+                <motion.div 
+                  initial={{ y: 100 }}
+                  animate={{ y: 0 }}
+                  className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-md"
                 >
-                  Revisar Pedido ({cart.length} itens)
-                  <ChevronRight size={20} />
-                </button>
-              </div>
+                  <div className="bg-[#5A5A40] text-white p-4 rounded-3xl shadow-2xl flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                        <ShoppingBag size={20} />
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider opacity-60 leading-none mb-1">Total Parcial</p>
+                        <p className="text-lg font-bold leading-none">R$ {totalValue.toFixed(2)}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setStep(STEPS.CART_REVIEW)}
+                      className="bg-white text-[#5A5A40] px-6 py-3 rounded-full font-bold text-sm hover:bg-[#f5f5f0] transition-all flex items-center gap-2"
+                    >
+                      Ver Pedido
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
             </motion.div>
           )}
 
@@ -582,16 +634,45 @@ export default function App() {
               key="success"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-center space-y-8 py-12"
+              className="max-w-2xl mx-auto space-y-8 py-12"
             >
-              <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
-                <CheckCircle2 size={48} />
+              <div className="text-center space-y-6">
+                <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
+                  <CheckCircle2 size={48} />
+                </div>
+                <div className="space-y-2">
+                  <h2 className="font-serif text-4xl font-bold">Pedido Enviado!</h2>
+                  <p className="text-xl font-medium text-[#5A5A40]">Número do Pedido: #{orderNumber}</p>
+                  <p className="opacity-60">Seu pedido foi processado e enviado via WhatsApp e E-mail.</p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <h2 className="font-serif text-4xl font-bold">Pedido Enviado!</h2>
-                <p className="text-xl font-medium text-[#5A5A40]">Número do Pedido: #{orderNumber}</p>
-                <p className="opacity-60">Seu pedido foi processado e enviado para o representante.</p>
+
+              <div className="bg-white rounded-3xl p-8 border border-[#1a1a1a]/5 shadow-sm space-y-6">
+                <div className="flex items-center gap-3 pb-4 border-b border-[#1a1a1a]/5">
+                  <Package className="text-[#5A5A40]" size={24} />
+                  <h3 className="font-bold">Resumo do Pedido</h3>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="opacity-60">Cliente:</span>
+                    <span className="font-medium">{customer.name}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="opacity-60">Itens:</span>
+                    <span className="font-medium">{cart.reduce((acc, item) => acc + item.quantity, 0)} dúzias</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="opacity-60">Forma de Pagamento:</span>
+                    <span className="font-medium">{paymentOptions.find(o => o.id === paymentMethod)?.label}</span>
+                  </div>
+                  <div className="flex justify-between pt-4 border-t border-[#1a1a1a]/5">
+                    <span className="font-bold">Total Final:</span>
+                    <span className="font-bold text-xl text-[#5A5A40]">R$ {finalTotal.toFixed(2)}</span>
+                  </div>
+                </div>
               </div>
+
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button
                   onClick={handleExit}
@@ -657,12 +738,25 @@ export default function App() {
               <div className="flex flex-col md:flex-row">
                 <div className="md:w-1/2 bg-[#f5f5f0] flex items-center justify-center p-8">
                   {selectedProductImage.imageUrl ? (
-                    <img 
-                      src={selectedProductImage.imageUrl} 
-                      alt={selectedProductImage.description}
-                      className="max-w-full max-h-[60vh] object-contain rounded-xl shadow-md"
-                      referrerPolicy="no-referrer"
-                    />
+                    <div className="relative w-full h-full flex items-center justify-center">
+                      <img 
+                        src={selectedProductImage.imageUrl} 
+                        alt={selectedProductImage.description}
+                        className="max-w-full max-h-[60vh] object-contain rounded-xl shadow-md"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          target.style.display = 'none';
+                          const fallback = target.nextElementSibling as HTMLElement;
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                      />
+                      <div className="hidden w-full aspect-square bg-[#e6e6e1] rounded-xl flex-col items-center justify-center text-[#5A5A40]/40 gap-2">
+                        <Package size={48} />
+                        <p className="text-xs font-bold uppercase tracking-widest">Imagem não disponível</p>
+                        <p className="text-[10px] opacity-60">(Arquivo vazio ou corrompido)</p>
+                      </div>
+                    </div>
                   ) : (
                     <div className="w-full aspect-square bg-[#e6e6e1] rounded-xl flex flex-col items-center justify-center text-[#5A5A40]/40 gap-2">
                       <Package size={48} />
@@ -762,24 +856,52 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd, onViewImage }
   const [quantity, setQuantity] = useState(0);
 
   return (
-    <div className="bg-white rounded-3xl p-5 sm:p-6 border border-[#1a1a1a]/5 hover:shadow-md transition-shadow flex flex-col gap-4 group">
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-2 sm:gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold bg-[#f5f5f0] px-2 py-0.5 rounded uppercase opacity-60">Ref: {product.ref}</span>
-            <button 
-              onClick={() => onViewImage(product)}
-              className="text-[#5A5A40] hover:text-[#4a4a34] flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider transition-colors"
-            >
-              <Eye size={12} />
-              Ver Imagem
-            </button>
-          </div>
-          <h3 className="font-medium leading-tight text-sm sm:text-base">{product.description}</h3>
+    <div className="bg-white rounded-3xl p-4 sm:p-5 border border-[#1a1a1a]/5 hover:shadow-md transition-shadow flex flex-col gap-4 group relative overflow-hidden">
+      <div className="flex gap-4">
+        {/* Thumbnail */}
+        <div 
+          className="w-20 h-20 sm:w-24 sm:h-24 bg-[#f5f5f0] rounded-2xl flex-shrink-0 flex items-center justify-center overflow-hidden cursor-pointer group/img relative"
+          onClick={() => onViewImage(product)}
+        >
+          {product.imageUrl ? (
+            <>
+              <img 
+                src={product.imageUrl} 
+                alt={product.description}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-110"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  target.style.display = 'none';
+                  const fallback = target.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'flex';
+                }}
+              />
+              <div className="hidden w-full h-full bg-[#e6e6e1] flex-col items-center justify-center text-[#5A5A40]/30">
+                <Package size={24} />
+              </div>
+              <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/10 transition-colors flex items-center justify-center">
+                <Eye size={16} className="text-white opacity-0 group-hover/img:opacity-100 transition-opacity" />
+              </div>
+            </>
+          ) : (
+            <div className="w-full h-full bg-[#e6e6e1] flex items-center justify-center text-[#5A5A40]/30">
+              <Package size={24} />
+            </div>
+          )}
         </div>
-        <div className="text-left sm:text-right">
-          <p className="text-base sm:text-lg font-serif font-bold">R$ {product.price.toFixed(2)}</p>
-          <p className="text-[10px] opacity-40 uppercase">Dúzia (12 un)</p>
+
+        <div className="flex-1 flex flex-col justify-between py-0.5">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] font-bold bg-[#f5f5f0] px-1.5 py-0.5 rounded uppercase opacity-60">Ref: {product.ref}</span>
+            </div>
+            <h3 className="font-medium leading-tight text-xs sm:text-sm line-clamp-2">{product.description}</h3>
+          </div>
+          <div className="flex items-baseline gap-1">
+            <p className="text-sm sm:text-base font-serif font-bold">R$ {product.price.toFixed(2)}</p>
+            <p className="text-[9px] opacity-40 uppercase font-sans">/ dz</p>
+          </div>
         </div>
       </div>
 
