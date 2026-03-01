@@ -136,10 +136,10 @@ export default function App() {
   const paymentOptions = useMemo(() => {
     const options = [{ id: 'avista', label: 'À Vista (6% desc)' }];
     if (totalValue > 0) {
-      if (totalValue <= 3000) {
-        options.push({ id: '306090', label: '30/60/90 dias' });
+      if (totalValue <= 2500) {
+        options.push({ id: '3060', label: '30/60 dias' });
       } else {
-        options.push({ id: '306090120', label: '30/60/90/120 dias' });
+        options.push({ id: '306090', label: '30/60/90 dias' });
       }
     }
     return options;
@@ -248,8 +248,10 @@ export default function App() {
     });
     
     const selectedOption = paymentOptions.find(opt => opt.id === paymentMethod);
+    const shippingInfo = totalValue > 2500 ? 'FRETE CIF' : 'FRETE FOB';
     message += `\n💰 *RESUMO DO PAGAMENTO*\n`;
     message += `• Forma: ${selectedOption?.label || 'Não informada'}\n`;
+    message += `• Frete: ${shippingInfo}\n`;
     
     if (paymentMethod === 'avista') {
       message += `• Subtotal: R$ ${totalValue.toFixed(2)}\n`;
@@ -592,6 +594,12 @@ export default function App() {
                       )}
 
                       <div className="flex flex-col items-end pt-4 border-t border-[#1a1a1a]/5">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[10px] uppercase tracking-wider font-bold opacity-40">Frete:</span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${totalValue > 2500 ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                            {totalValue > 2500 ? 'FRETE CIF' : 'FRETE FOB'}
+                          </span>
+                        </div>
                         <p className="text-sm opacity-60">Valor Total Final</p>
                         <p className="text-4xl font-serif font-bold text-[#5A5A40]">R$ {finalTotal.toFixed(2)}</p>
                       </div>
@@ -672,6 +680,12 @@ export default function App() {
                   <div className="flex justify-between text-sm">
                     <span className="opacity-60">Forma de Pagamento:</span>
                     <span className="font-medium">{paymentOptions.find(o => o.id === paymentMethod)?.label}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="opacity-60">Frete:</span>
+                    <span className={`font-bold ${totalValue > 2500 ? 'text-green-600' : 'text-blue-600'}`}>
+                      {totalValue > 2500 ? 'FRETE CIF' : 'FRETE FOB'}
+                    </span>
                   </div>
                   <div className="flex justify-between pt-4 border-t border-[#1a1a1a]/5">
                     <span className="font-bold">Total Final:</span>
@@ -815,8 +829,8 @@ export default function App() {
           <p className="text-[11px] font-bold text-red-600 uppercase tracking-wider mb-2">Informações Importantes</p>
           <div className="text-[10px] text-red-600 leading-relaxed space-y-1 text-left md:text-center max-w-2xl mx-auto font-medium">
             <p>- Kits M/M são padronizados (sem alteração).</p>
-            <p>- Acima de R$ 3.000,00: 30/60/90/120 (frete CIF).</p>
-            <p>- Abaixo de R$ 3.000,00: 30/60/90 (frete FOB).</p>
+            <p>- Acima de R$ 2.500,00: 30/60/90 (frete CIF).</p>
+            <p>- Até R$ 2.500,00: 30/60 (frete FOB).</p>
             <p>- À vista: 6% desc.</p>
             <p>- Cores lisas, estampadas ou sortidas, sujeitas à disponibilidade em estoque.</p>
             <p>- Produtos com código de barras geram crédito de ICMS.</p>
