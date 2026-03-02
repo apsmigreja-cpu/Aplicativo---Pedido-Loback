@@ -849,6 +849,11 @@ export default function App() {
             <p>- Produtos com código de barras geram crédito de ICMS.</p>
           </div>
         </div>
+        <div className="pt-8 border-t border-[#1a1a1a]/5">
+          <p className="text-[10px] uppercase tracking-widest opacity-30 font-medium">
+            Desenvolvido por <span className="font-bold">AQCI Solutions</span>
+          </p>
+        </div>
       </footer>
     </div>
   );
