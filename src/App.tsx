@@ -146,10 +146,15 @@ export default function App() {
   }, [totalValue]);
 
   const finalTotal = useMemo(() => {
+    let total = totalValue;
     if (paymentMethod === 'avista') {
-      return totalValue * 0.94;
+      total = totalValue * 0.94;
     }
-    return totalValue;
+    // Add shipping cost if FOB (totalValue <= 2500)
+    if (totalValue > 0 && totalValue <= 2500) {
+      total += 80;
+    }
+    return total;
   }, [totalValue, paymentMethod]);
 
   const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -217,7 +222,7 @@ export default function App() {
   };
 
   const sendOrder = () => {
-    const representativePhone = '5543991703458';
+    const representativePhone = '5543999526727';
     const representativeEmail = 'apsmigreja@gmail.com';
     const newOrderNum = generateOrderNumber();
     setOrderNumber(newOrderNum);
@@ -248,7 +253,8 @@ export default function App() {
     });
     
     const selectedOption = paymentOptions.find(opt => opt.id === paymentMethod);
-    const shippingInfo = totalValue > 2500 ? 'FRETE CIF' : 'FRETE FOB';
+    const isFob = totalValue <= 2500;
+    const shippingInfo = !isFob ? 'FRETE CIF' : 'FRETE FOB (R$ 80,00)';
     message += `\n💰 *RESUMO DO PAGAMENTO*\n`;
     message += `• Forma: ${selectedOption?.label || 'Não informada'}\n`;
     message += `• Frete: ${shippingInfo}\n`;
@@ -256,6 +262,10 @@ export default function App() {
     if (paymentMethod === 'avista') {
       message += `• Subtotal: R$ ${totalValue.toFixed(2)}\n`;
       message += `• Desconto (6%): R$ ${(totalValue * 0.06).toFixed(2)}\n`;
+    }
+
+    if (isFob) {
+      message += `• Valor do Frete: R$ 80,00\n`;
     }
     
     message += `• *TOTAL FINAL: R$ ${finalTotal.toFixed(2)}*\n\n`;
@@ -597,9 +607,12 @@ export default function App() {
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-[10px] uppercase tracking-wider font-bold opacity-40">Frete:</span>
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${totalValue > 2500 ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                            {totalValue > 2500 ? 'FRETE CIF' : 'FRETE FOB'}
+                            {totalValue > 2500 ? 'FRETE CIF' : 'FRETE FOB (R$ 80,00)'}
                           </span>
                         </div>
+                        {totalValue > 0 && totalValue <= 2500 && (
+                          <p className="text-[10px] text-blue-700 font-medium mb-2">Valor do frete incluso no total</p>
+                        )}
                         <p className="text-sm opacity-60">Valor Total Final</p>
                         <p className="text-4xl font-serif font-bold text-[#5A5A40]">R$ {finalTotal.toFixed(2)}</p>
                       </div>
@@ -684,7 +697,7 @@ export default function App() {
                   <div className="flex justify-between text-sm">
                     <span className="opacity-60">Frete:</span>
                     <span className={`font-bold ${totalValue > 2500 ? 'text-green-600' : 'text-blue-600'}`}>
-                      {totalValue > 2500 ? 'FRETE CIF' : 'FRETE FOB'}
+                      {totalValue > 2500 ? 'FRETE CIF' : 'FRETE FOB (R$ 80,00)'}
                     </span>
                   </div>
                   <div className="flex justify-between pt-4 border-t border-[#1a1a1a]/5">
@@ -830,7 +843,7 @@ export default function App() {
           <div className="text-[10px] text-red-600 leading-relaxed space-y-1 text-left md:text-center max-w-2xl mx-auto font-medium">
             <p>- Kits M/M são padronizados (sem alteração).</p>
             <p>- Acima de R$ 2.500,00: 30/60/90 (frete CIF).</p>
-            <p>- Até R$ 2.500,00: 30/60 (frete FOB).</p>
+            <p>- Até R$ 2.500,00: 30/60 (frete FOB - R$ 80,00).</p>
             <p>- À vista: 6% desc.</p>
             <p>- Cores lisas, estampadas ou sortidas, sujeitas à disponibilidade em estoque.</p>
             <p>- Produtos com código de barras geram crédito de ICMS.</p>
