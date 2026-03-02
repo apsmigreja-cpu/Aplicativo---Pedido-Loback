@@ -1,7 +1,7 @@
 import { Product } from '../types';
 
 export const products: Product[] = [
-  { ref: "02", description: "CUECA AD. EL. EXP. LATERAL RIB - PVC", sizes: ["P", "M", "G", "GG"], price: 75.60, imageUrl: "REF02.jpg" },
+  { ref: "02", description: "CUECA AD. EL. EXP. LATERAL RIB - PVC", sizes: ["P", "M", "G", "GG"], price: 75.60, imageUrl: "https://i.postimg.cc/59X3BkH6/REF02.jpg" },
   { ref: "03", description: "CUECA FEMININA EL. LOBACK", sizes: ["P", "M", "G", "GG"], price: 68.64, imageUrl: "REF03.jpg" },
   { ref: "04", description: "FIO DENTAL LOBACK", sizes: ["P", "M", "G", "GG"], price: 62.64, imageUrl: "REF04.jpg" },
   { ref: "05", description: "TANGÃO COTTON", sizes: ["M", "G", "GG"], price: 64.80, imageUrl: "REF05.jpg" },
