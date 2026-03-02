@@ -159,7 +159,7 @@ export default function App() {
 
   const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    let maskedValue = value;
+    let maskedValue = value.toUpperCase();
 
     if (name === 'phone') maskedValue = maskPhone(value);
     if (name === 'cnpj') maskedValue = maskCNPJ(value);
@@ -223,7 +223,7 @@ export default function App() {
 
   const sendOrder = () => {
     const representativePhone = '5543999526727';
-    const representativeEmail = 'apsmigreja@gmail.com';
+    const representativeEmail = 'representacaopimenta@gmail.com';
     const newOrderNum = generateOrderNumber();
     setOrderNumber(newOrderNum);
     
@@ -365,7 +365,14 @@ export default function App() {
                 </div>
                 <Input label="Bairro" name="neighborhood" value={customer.neighborhood} onChange={handleCustomerChange} required />
                 <Input label="Cidade" name="city" value={customer.city} onChange={handleCustomerChange} required />
-                <Input label="Estado" name="state" value={customer.state} onChange={handleCustomerChange} required />
+                <Select 
+                  label="Estado" 
+                  name="state" 
+                  value={customer.state} 
+                  onChange={(e: any) => handleCustomerChange(e)} 
+                  options={['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']} 
+                  required 
+                />
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -621,7 +628,7 @@ export default function App() {
                         <p className="text-[10px] uppercase tracking-wider font-bold opacity-40">Observações do Pedido</p>
                         <textarea
                           value={observations}
-                          onChange={(e) => setObservations(e.target.value)}
+                          onChange={(e) => setObservations(e.target.value.toUpperCase())}
                           placeholder="Caso precise, adicione aqui informações importantes sobre o seu pedido..."
                           className="w-full bg-[#f5f5f0] border border-[#1a1a1a]/5 rounded-2xl p-4 text-sm min-h-[100px] focus:outline-none focus:ring-2 focus:ring-[#5A5A40]/10 focus:bg-white transition-all resize-none"
                         />
@@ -878,6 +885,39 @@ const Input: React.FC<InputProps> = ({ label, icon, required, ...props }) => {
           required={required}
           className={`w-full bg-[#f5f5f0] border border-[#1a1a1a]/5 rounded-2xl py-3 ${icon ? 'pl-11' : 'pl-4'} pr-4 focus:outline-none focus:ring-2 focus:ring-[#5A5A40]/10 focus:bg-white transition-all`}
         />
+      </div>
+    </div>
+  );
+};
+
+interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  label: string;
+  icon?: React.ReactNode;
+  options: string[];
+  required?: boolean;
+}
+
+const Select: React.FC<SelectProps> = ({ label, icon, options, required, ...props }) => {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-[10px] uppercase tracking-wider font-bold opacity-40 ml-1">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      <div className="relative">
+        {icon && <div className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30 z-10">{icon}</div>}
+        <select
+          {...props}
+          required={required}
+          className={`w-full bg-[#f5f5f0] border border-[#1a1a1a]/5 rounded-2xl py-3 ${icon ? 'pl-11' : 'pl-4'} pr-10 focus:outline-none focus:ring-2 focus:ring-[#5A5A40]/10 focus:bg-white transition-all appearance-none cursor-pointer`}
+        >
+          <option value="">Selecione...</option>
+          {options.map(opt => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-30">
+          <ChevronRight size={16} className="rotate-90" />
+        </div>
       </div>
     </div>
   );
