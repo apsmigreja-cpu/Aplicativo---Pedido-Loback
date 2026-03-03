@@ -130,7 +130,10 @@ export default function App() {
   }, [searchTerm, selectedCategory]);
 
   const totalValue = useMemo(() => {
-    return cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
+    return cart.reduce((acc, item) => {
+      const price = item.unitType === 'DUZIA' ? item.product.price : (item.product.unitPrice || item.product.price / 12);
+      return acc + (price * item.quantity);
+    }, 0);
   }, [cart]);
 
   const paymentOptions = useMemo(() => {
@@ -169,17 +172,17 @@ export default function App() {
     setCustomer(prev => ({ ...prev, [name]: maskedValue }));
   };
 
-  const addToCart = (product: Product, size: string, quantity: number) => {
+  const addToCart = (product: Product, size: string, quantity: number, unitType: 'DUZIA' | 'UNIDADE') => {
     if (quantity <= 0) return;
     
     setCart(prev => {
-      const existingIndex = prev.findIndex(item => item.product.ref === product.ref && item.size === size);
+      const existingIndex = prev.findIndex(item => item.product.ref === product.ref && item.size === size && item.unitType === unitType);
       if (existingIndex >= 0) {
         const newCart = [...prev];
         newCart[existingIndex].quantity += quantity;
         return newCart;
       }
-      return [...prev, { product, size, quantity }];
+      return [...prev, { product, size, quantity, unitType }];
     });
   };
 
@@ -246,9 +249,11 @@ export default function App() {
     message += `${separator}\n`;
     
     cart.forEach(item => {
+      const price = item.unitType === 'DUZIA' ? item.product.price : (item.product.unitPrice || item.product.price / 12);
+      const unitLabel = item.unitType === 'DUZIA' ? 'dz' : 'un';
       message += `✅ [REF: ${item.product.ref}] ${item.product.description}\n`;
-      message += `   Tam: ${item.size} | Qtd: ${item.quantity} dz\n`;
-      message += `   Vlr Dz: R$ ${item.product.price.toFixed(2)} | Sub: R$ ${(item.product.price * item.quantity).toFixed(2)}\n`;
+      message += `   Tam: ${item.size} | Qtd: ${item.quantity} ${unitLabel}\n`;
+      message += `   Vlr ${unitLabel}: R$ ${price.toFixed(2)} | Sub: R$ ${(price * item.quantity).toFixed(2)}\n`;
       message += `${separator}\n`;
     });
     
@@ -534,45 +539,50 @@ export default function App() {
                 ) : (
                   <>
                     <div className="divide-y divide-[#1a1a1a]/5">
-                      {cart.map((item, index) => (
-                        <div key={`${item.product.ref}-${item.size}`} className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                          <div className="flex-1 space-y-1">
-                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-bold bg-[#f5f5f0] px-2 py-0.5 rounded uppercase opacity-60">Ref: {item.product.ref}</span>
-                              <span className="text-[10px] font-bold bg-[#5A5A40]/10 text-[#5A5A40] px-2 py-0.5 rounded uppercase">Tam: {item.size}</span>
+                      {cart.map((item, index) => {
+                        const price = item.unitType === 'DUZIA' ? item.product.price : (item.product.unitPrice || item.product.price / 12);
+                        const unitLabel = item.unitType === 'DUZIA' ? 'dz' : 'un';
+                        return (
+                          <div key={`${item.product.ref}-${item.size}-${item.unitType}`} className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex-1 space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-bold bg-[#f5f5f0] px-2 py-0.5 rounded uppercase opacity-60">Ref: {item.product.ref}</span>
+                                <span className="text-[10px] font-bold bg-[#5A5A40]/10 text-[#5A5A40] px-2 py-0.5 rounded uppercase">Tam: {item.size}</span>
+                                <span className="text-[10px] font-bold bg-[#1a1a1a]/10 text-[#1a1a1a] px-2 py-0.5 rounded uppercase">{item.unitType}</span>
+                              </div>
+                              <h3 className="font-medium text-sm sm:text-base">{item.product.description}</h3>
+                              <p className="text-xs sm:text-sm opacity-60">R$ {price.toFixed(2)} / {unitLabel}</p>
                             </div>
-                            <h3 className="font-medium text-sm sm:text-base">{item.product.description}</h3>
-                            <p className="text-xs sm:text-sm opacity-60">R$ {item.product.price.toFixed(2)} / dúzia</p>
-                          </div>
-                          
-                          <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-4 border-t sm:border-t-0 pt-3 sm:pt-0">
-                            <div className="flex items-center bg-[#f5f5f0] rounded-full p-1">
+                            
+                            <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-4 border-t sm:border-t-0 pt-3 sm:pt-0">
+                              <div className="flex items-center bg-[#f5f5f0] rounded-full p-1">
+                                <button 
+                                  onClick={() => updateQuantity(index, -1)}
+                                  className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-full transition-colors"
+                                >
+                                  <Minus size={14} />
+                                </button>
+                                <span className="w-12 text-center font-medium text-xs sm:text-sm">{item.quantity} {unitLabel}</span>
+                                <button 
+                                  onClick={() => updateQuantity(index, 1)}
+                                  className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-full transition-colors"
+                                >
+                                  <Plus size={14} />
+                                </button>
+                              </div>
+                              <div className="text-right min-w-[70px] sm:min-w-[80px]">
+                                <p className="font-bold text-sm sm:text-base">R$ {(price * item.quantity).toFixed(2)}</p>
+                              </div>
                               <button 
-                                onClick={() => updateQuantity(index, -1)}
-                                className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-full transition-colors"
+                                onClick={() => removeFromCart(index)}
+                                className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
                               >
-                                <Minus size={14} />
-                              </button>
-                              <span className="w-12 text-center font-medium text-xs sm:text-sm">{item.quantity} dz</span>
-                              <button 
-                                onClick={() => updateQuantity(index, 1)}
-                                className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-full transition-colors"
-                              >
-                                <Plus size={14} />
+                                <Trash2 size={18} />
                               </button>
                             </div>
-                            <div className="text-right min-w-[70px] sm:min-w-[80px]">
-                              <p className="font-bold text-sm sm:text-base">R$ {(item.product.price * item.quantity).toFixed(2)}</p>
-                            </div>
-                            <button 
-                              onClick={() => removeFromCart(index)}
-                              className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                            >
-                              <Trash2 size={18} />
-                            </button>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                     <div className="bg-[#f5f5f0]/50 p-8 flex flex-col items-end gap-2">
                       <p className="text-sm opacity-60">Subtotal do Pedido</p>
@@ -925,13 +935,16 @@ const Select: React.FC<SelectProps> = ({ label, icon, options, required, ...prop
 
 interface ProductCardProps {
   product: Product;
-  onAdd: (p: Product, s: string, q: number) => void;
+  onAdd: (p: Product, s: string, q: number, ut: 'DUZIA' | 'UNIDADE') => void;
   onViewImage: (p: Product) => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd, onViewImage }) => {
   const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
   const [quantity, setQuantity] = useState(0);
+  const [unitType, setUnitType] = useState<'DUZIA' | 'UNIDADE'>('DUZIA');
+
+  const currentPrice = unitType === 'DUZIA' ? product.price : (product.unitPrice || product.price / 12);
 
   return (
     <div className="bg-white rounded-3xl p-4 sm:p-5 border border-[#1a1a1a]/5 hover:shadow-md transition-shadow flex flex-col gap-4 group relative overflow-hidden">
@@ -976,13 +989,41 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd, onViewImage }
             <h3 className="font-medium leading-tight text-xs sm:text-sm line-clamp-2">{product.description}</h3>
           </div>
           <div className="flex items-baseline gap-1">
-            <p className="text-sm sm:text-base font-serif font-bold">R$ {product.price.toFixed(2)}</p>
-            <p className="text-[9px] opacity-40 uppercase font-sans">/ dz</p>
+            <p className="text-sm sm:text-base font-serif font-bold">R$ {currentPrice.toFixed(2)}</p>
+            <p className="text-[9px] opacity-40 uppercase font-sans">/ {unitType === 'DUZIA' ? 'dz' : 'un'}</p>
           </div>
         </div>
       </div>
 
       <div className="space-y-3 mt-auto">
+        {product.unitPrice && (
+          <div className="space-y-1.5">
+            <p className="text-[10px] uppercase tracking-wider font-bold opacity-40">Venda por</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setUnitType('DUZIA')}
+                className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
+                  unitType === 'DUZIA' 
+                    ? 'bg-[#5A5A40] text-white shadow-sm' 
+                    : 'bg-[#f5f5f0] text-[#1a1a1a] hover:bg-[#e6e6e1]'
+                }`}
+              >
+                DÚZIA
+              </button>
+              <button
+                onClick={() => setUnitType('UNIDADE')}
+                className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
+                  unitType === 'UNIDADE' 
+                    ? 'bg-[#5A5A40] text-white shadow-sm' 
+                    : 'bg-[#f5f5f0] text-[#1a1a1a] hover:bg-[#e6e6e1]'
+                }`}
+              >
+                UNIDADE
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-1.5">
           <p className="text-[10px] uppercase tracking-wider font-bold opacity-40">Tamanho</p>
           <div className="flex flex-wrap gap-2">
@@ -1010,7 +1051,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd, onViewImage }
             >
               <Minus size={16} />
             </button>
-            <span className="flex-1 text-center font-bold">{quantity} dz</span>
+            <span className="flex-1 text-center font-bold">{quantity} {unitType === 'DUZIA' ? 'dz' : 'un'}</span>
             <button 
               onClick={() => setQuantity(q => q + 1)}
               className="w-10 h-10 flex items-center justify-center hover:bg-white rounded-full transition-colors"
@@ -1020,7 +1061,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd, onViewImage }
           </div>
           <button
             onClick={() => {
-              onAdd(product, selectedSize, quantity);
+              onAdd(product, selectedSize, quantity, unitType);
               setQuantity(0);
             }}
             disabled={quantity === 0}
