@@ -38,7 +38,7 @@ export const products: Product[] = [
   { ref: "083", description: "CUECA BOXER JUVENIL MASCULINA-PVC", sizes: ["P", "M", "G", "GG"], price: 108.00, dozenPrice: 108.00, unitPrice: 9.00, imageUrl: "https://i.postimg.cc/hvNdhbF0/REF083.jpg" },
   { ref: "088", description: "CUECA BOXER INFANTIL - PVC", sizes: ["P", "M", "G", "GG"], price: 66.00, dozenPrice: 66.00, unitPrice: 5.50, imageUrl: "https://i.postimg.cc/rFt43bWr/REF088.jpg" },
   { ref: "090", description: "CUECA BOXER AD. ELAST. EXP . LOBACK", sizes: ["P", "M", "G", "GG"], price: 126.00, dozenPrice: 126.00, unitPrice: 10.50, imageUrl: "https://i.postimg.cc/L6ZPw7fN/REF090.jpg" },
-  { ref: "096", description: "CUECA ADULTO MICROFIBRA", sizes: ["P", "M", "G", "GG"], price: 170.40, dozenPrice: 170.40, unitPrice: 14.20, imageUrl: "https://i.postimg.cc/Dwg4ZLnB/SEM_IMG.jpg" },
+  { ref: "096", description: "CUECA ADULTO MICROFIBRA", sizes: ["P", "M", "G", "GG"], price: 170.40, dozenPrice: 170.40, unitPrice: 14.20, imageUrl: "https://i.postimg.cc/zBbv1X8m/REF096.jpg" },
   { ref: "101", description: "TANGA SANDUICHE", sizes: ["P", "M", "G", "GG"], price: 57.96, imageUrl: "https://i.postimg.cc/65GZgSRj/REF101.jpg" },
   { ref: "112", description: "CALÇA SARA", sizes: ["P", "M", "G", "GG"], price: 72.00, imageUrl: "https://i.postimg.cc/JzNk4kpy/REF112.jpg" },
   { ref: "113", description: "CALÇOLINHA MAISE", sizes: ["P", "M", "G", "GG"], price: 55.20, dozenPrice: 55.20, unitPrice: 4.60, imageUrl: "https://i.postimg.cc/y8mZYZLR/REF113.jpg" },
