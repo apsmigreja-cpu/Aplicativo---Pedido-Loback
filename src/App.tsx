@@ -221,6 +221,21 @@ export default function App() {
         phone: ''
       });
       setStep(STEPS.CUSTOMER_INFO);
+      
+      // Tenta fechar a janela do navegador de forma robusta
+      try {
+        window.open('', '_self', '');
+        window.close();
+        
+        // Fallback para navegadores que bloqueiam window.close()
+        setTimeout(() => {
+          if (!window.closed) {
+            window.location.href = "about:blank";
+          }
+        }, 100);
+      } catch (e) {
+        window.location.href = "about:blank";
+      }
     }
   };
 
