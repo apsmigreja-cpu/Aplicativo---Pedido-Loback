@@ -49,7 +49,7 @@ export default function App() {
     address: '',
     neighborhood: '',
     city: '',
-    state: '',
+    state: 'PR',
     zip: '',
     cnpj: '',
     ie: '',
@@ -116,8 +116,7 @@ export default function App() {
       customer.zip.length === 9 &&
       customer.address.trim() !== '' &&
       customer.neighborhood.trim() !== '' &&
-      customer.city.trim() !== '' &&
-      customer.state.trim() !== ''
+      customer.city.trim() !== ''
     );
   }, [customer]);
 
@@ -213,7 +212,7 @@ export default function App() {
         address: '',
         neighborhood: '',
         city: '',
-        state: '',
+        state: 'PR',
         zip: '',
         cnpj: '',
         ie: '',
@@ -384,15 +383,9 @@ export default function App() {
                   <Input label="Endereço" name="address" value={customer.address} onChange={handleCustomerChange} icon={<MapPin size={18}/>} required />
                 </div>
                 <Input label="Bairro" name="neighborhood" value={customer.neighborhood} onChange={handleCustomerChange} required />
-                <Input label="Cidade" name="city" value={customer.city} onChange={handleCustomerChange} required />
-                <Select 
-                  label="Estado" 
-                  name="state" 
-                  value={customer.state} 
-                  onChange={(e: any) => handleCustomerChange(e)} 
-                  options={['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']} 
-                  required 
-                />
+                <div className="md:col-span-2">
+                  <Input label="Cidade" name="city" value={customer.city} onChange={handleCustomerChange} required />
+                </div>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
