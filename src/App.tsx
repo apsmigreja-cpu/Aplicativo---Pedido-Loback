@@ -452,7 +452,7 @@ export default function App() {
               className="space-y-8"
             >
               <div className="text-center space-y-2">
-                <h2 className="font-serif text-3xl font-light">Informações do Cliente</h2>
+                <h2 className="font-serif text-3xl font-bold">Informações do Cliente</h2>
                 <p className="text-sm opacity-60">Confirme seus dados para finalizar o pedido</p>
               </div>
 
@@ -485,6 +485,10 @@ export default function App() {
                         onClick={() => {
                           setIsCnpjFetched(false);
                           setCnpjError('');
+                          setCustomer(prev => ({ ...prev, cnpj: '' }));
+                          setTimeout(() => {
+                            cnpjInputRef.current?.focus();
+                          }, 100);
                         }}
                         className="bg-white text-[#5A5A40] border border-[#5A5A40]/20 px-6 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider hover:bg-[#f5f5f0] transition-all h-[52px]"
                       >
@@ -556,7 +560,7 @@ export default function App() {
                       <ChevronLeft size={24} />
                     </button>
                     <div className="space-y-1 flex-1 min-w-0">
-                      <h2 className="font-serif text-3xl font-light truncate">Catálogo de Produtos</h2>
+                      <h2 className="font-serif text-3xl font-bold truncate">Catálogo de Produtos</h2>
                       <p className="text-sm opacity-60 leading-tight break-words">Selecione os itens e tamanhos desejados (Venda por Dúzia e Unidade)</p>
                     </div>
                   </div>
@@ -658,7 +662,7 @@ export default function App() {
                 >
                   <ChevronLeft size={24} />
                 </button>
-                <h2 className="font-serif text-3xl font-light">Seu Carrinho</h2>
+                <h2 className="font-serif text-3xl font-bold">Seu Carrinho</h2>
               </div>
 
               <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#1a1a1a]/5">
