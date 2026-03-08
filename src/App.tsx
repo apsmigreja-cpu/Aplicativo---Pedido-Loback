@@ -73,8 +73,8 @@ export default function App() {
     if (step === STEPS.PRODUCT_SELECTION) {
       setSearchTerm('');
       setSelectedCategory('Todas');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [step]);
 
   const categories = ['Todas', 'Cuecas', 'Tangas & Fios', 'Calçolas & Calças', 'Conjuntos & Tops', 'Fitness', 'Pijamas & Noite'];
