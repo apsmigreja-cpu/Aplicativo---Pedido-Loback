@@ -23,7 +23,9 @@ import {
   Package,
   LogOut,
   Eye,
-  X
+  X,
+  ZoomIn,
+  ZoomOut
 } from 'lucide-react';
 import { products } from './data/products';
 import { CustomerInfo, CartItem, Product } from './types';
@@ -66,6 +68,7 @@ export default function App() {
   const [observations, setObservations] = useState<string>('');
   const [selectedProductImage, setSelectedProductImage] = useState<Product | null>(null);
   const [isCnpjFetched, setIsCnpjFetched] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
   const cnpjInputRef = useRef<HTMLInputElement>(null);
   const paymentSectionRef = useRef<HTMLDivElement>(null);
 
@@ -75,6 +78,7 @@ export default function App() {
       setSelectedCategory('Todas');
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsZoomed(false);
   }, [step]);
 
   const categories = ['Todas', 'Cuecas', 'Tangas & Fios', 'Calçolas & Calças', 'Conjuntos & Tops', 'Fitness', 'Pijamas & Noite'];
@@ -933,7 +937,10 @@ export default function App() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
-            onClick={() => setSelectedProductImage(null)}
+            onClick={() => {
+              setSelectedProductImage(null);
+              setIsZoomed(false);
+            }}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -943,27 +950,47 @@ export default function App() {
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                onClick={() => setSelectedProductImage(null)}
+                onClick={() => {
+                  setSelectedProductImage(null);
+                  setIsZoomed(false);
+                }}
                 className="absolute top-4 right-4 z-10 p-2 bg-white/90 hover:bg-white rounded-full text-[#1a1a1a] transition-all shadow-lg"
               >
                 <X size={24} />
               </button>
               
               <div className="flex flex-col md:flex-row">
-                <div className="md:w-1/2 bg-[#f5f5f0] flex items-center justify-center p-8">
+                <div className="md:w-1/2 bg-[#f5f5f0] flex items-center justify-center p-8 relative overflow-hidden">
                   {selectedProductImage.imageUrl ? (
-                    <div className="relative w-full h-full flex items-center justify-center">
-                      <img 
-                        src={getImageUrl(selectedProductImage.imageUrl)} 
-                        alt={selectedProductImage.description}
-                        className="max-w-full max-h-[60vh] object-contain rounded-xl shadow-md"
-                        onError={(e) => {
-                          const target = e.currentTarget;
-                          target.style.display = 'none';
-                          const fallback = target.nextElementSibling as HTMLElement;
-                          if (fallback) fallback.style.display = 'flex';
+                    <div className={`relative w-full h-full flex items-center justify-center transition-all duration-300 ${isZoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'}`}>
+                      <div className={`relative transition-transform duration-300 ease-in-out ${isZoomed ? 'scale-[2] z-20' : 'scale-100'}`}>
+                        <img 
+                          src={getImageUrl(selectedProductImage.imageUrl)} 
+                          alt={selectedProductImage.description}
+                          className="max-w-full max-h-[60vh] object-contain rounded-xl shadow-md"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsZoomed(!isZoomed);
+                          }}
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            target.style.display = 'none';
+                            const fallback = target.nextElementSibling as HTMLElement;
+                            if (fallback) fallback.style.display = 'flex';
+                          }}
+                        />
+                      </div>
+                      
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsZoomed(!isZoomed);
                         }}
-                      />
+                        className="absolute bottom-4 right-4 z-30 p-3 bg-white/90 hover:bg-white rounded-full text-[#5A5A40] transition-all shadow-lg border border-[#5A5A40]/10"
+                        title={isZoomed ? "Diminuir Zoom" : "Aumentar Zoom"}
+                      >
+                        {isZoomed ? <ZoomOut size={20} /> : <ZoomIn size={20} />}
+                      </button>
                       <div className="hidden w-full aspect-square bg-[#e6e6e1] rounded-xl flex-col items-center justify-center text-[#5A5A40]/40 gap-2">
                         <Package size={48} />
                         <p className="text-xs font-bold uppercase tracking-widest">Imagem não disponível</p>
