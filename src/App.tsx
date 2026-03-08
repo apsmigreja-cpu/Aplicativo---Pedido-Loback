@@ -69,6 +69,7 @@ export default function App() {
   const [selectedProductImage, setSelectedProductImage] = useState<Product | null>(null);
   const [isCnpjFetched, setIsCnpjFetched] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
+  const [panPosition, setPanPosition] = useState({ x: 50, y: 50 });
   const cnpjInputRef = useRef<HTMLInputElement>(null);
   const paymentSectionRef = useRef<HTMLDivElement>(null);
 
@@ -79,6 +80,7 @@ export default function App() {
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setIsZoomed(false);
+    setPanPosition({ x: 50, y: 50 });
   }, [step]);
 
   const categories = ['Todas', 'Cuecas', 'Tangas & Fios', 'Calçolas & Calças', 'Conjuntos & Tops', 'Fitness', 'Pijamas & Noite'];
@@ -940,6 +942,7 @@ export default function App() {
             onClick={() => {
               setSelectedProductImage(null);
               setIsZoomed(false);
+              setPanPosition({ x: 50, y: 50 });
             }}
           >
             <motion.div
@@ -953,6 +956,7 @@ export default function App() {
                 onClick={() => {
                   setSelectedProductImage(null);
                   setIsZoomed(false);
+                  setPanPosition({ x: 50, y: 50 });
                 }}
                 className="absolute top-4 right-4 z-10 p-2 bg-white/90 hover:bg-white rounded-full text-[#1a1a1a] transition-all shadow-lg"
               >
@@ -960,17 +964,42 @@ export default function App() {
               </button>
               
               <div className="flex flex-col md:flex-row">
-                <div className="md:w-1/2 bg-[#f5f5f0] flex items-center justify-center p-8 relative overflow-hidden">
+                <div 
+                  className="md:w-1/2 bg-[#f5f5f0] flex items-center justify-center p-8 relative overflow-hidden"
+                  onMouseMove={(e) => {
+                    if (!isZoomed) return;
+                    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+                    const x = ((e.clientX - left) / width) * 100;
+                    const y = ((e.clientY - top) / height) * 100;
+                    setPanPosition({ x, y });
+                  }}
+                  onTouchMove={(e) => {
+                    if (!isZoomed) return;
+                    const touch = e.touches[0];
+                    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+                    const x = ((touch.clientX - left) / width) * 100;
+                    const y = ((touch.clientY - top) / height) * 100;
+                    setPanPosition({ x, y });
+                  }}
+                >
                   {selectedProductImage.imageUrl ? (
                     <div className={`relative w-full h-full flex items-center justify-center transition-all duration-300 ${isZoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'}`}>
-                      <div className={`relative transition-transform duration-300 ease-in-out ${isZoomed ? 'scale-[2] z-20' : 'scale-100'}`}>
+                      <div 
+                        className={`relative transition-transform duration-300 ease-out ${isZoomed ? 'scale-[2.5] z-20' : 'scale-100'}`}
+                        style={isZoomed ? { transformOrigin: `${panPosition.x}% ${panPosition.y}%` } : {}}
+                      >
                         <img 
                           src={getImageUrl(selectedProductImage.imageUrl)} 
                           alt={selectedProductImage.description}
                           className="max-w-full max-h-[60vh] object-contain rounded-xl shadow-md"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setIsZoomed(!isZoomed);
+                            if (isZoomed) {
+                              setIsZoomed(false);
+                              setPanPosition({ x: 50, y: 50 });
+                            } else {
+                              setIsZoomed(true);
+                            }
                           }}
                           onError={(e) => {
                             const target = e.currentTarget;
@@ -984,7 +1013,12 @@ export default function App() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setIsZoomed(!isZoomed);
+                          if (isZoomed) {
+                            setIsZoomed(false);
+                            setPanPosition({ x: 50, y: 50 });
+                          } else {
+                            setIsZoomed(true);
+                          }
                         }}
                         className="absolute bottom-4 right-4 z-30 p-3 bg-white/90 hover:bg-white rounded-full text-[#5A5A40] transition-all shadow-lg border border-[#5A5A40]/10"
                         title={isZoomed ? "Diminuir Zoom" : "Aumentar Zoom"}
