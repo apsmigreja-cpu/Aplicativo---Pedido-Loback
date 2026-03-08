@@ -67,6 +67,7 @@ export default function App() {
   const [selectedProductImage, setSelectedProductImage] = useState<Product | null>(null);
   const [isCnpjFetched, setIsCnpjFetched] = useState(false);
   const cnpjInputRef = useRef<HTMLInputElement>(null);
+  const paymentSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (step === STEPS.PRODUCT_SELECTION) {
@@ -725,9 +726,14 @@ export default function App() {
                       <p className="text-2xl font-serif font-bold">R$ {totalValue.toFixed(2)}</p>
                     </div>
 
-                    <div className="p-8 space-y-4 border-t border-[#1a1a1a]/5">
-                      <div className="space-y-2">
-                        <p className="text-[10px] uppercase tracking-wider font-bold opacity-40">Escolha a Forma de Pagamento</p>
+                    <div className="p-8 space-y-6 border-t border-[#1a1a1a]/5">
+                      <div ref={paymentSectionRef} className={`space-y-4 p-4 rounded-3xl transition-all duration-500 ${!paymentMethod ? 'bg-[#5A5A40]/5 ring-2 ring-[#5A5A40]/20 animate-pulse' : ''}`}>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <p className="text-[11px] uppercase tracking-wider font-bold text-[#5A5A40]">1. Escolha a Forma de Pagamento</p>
+                          {!paymentMethod && (
+                            <span className="text-[10px] font-bold text-red-500 animate-bounce">Ação Necessária!</span>
+                          )}
+                        </div>
                         <div className="flex flex-wrap gap-3">
                           {paymentOptions.map((option) => (
                             <button
@@ -794,12 +800,30 @@ export default function App() {
                       Continuar Comprando
                     </button>
                     <button
-                      onClick={() => setStep(STEPS.CUSTOMER_INFO)}
-                      disabled={!paymentMethod}
-                      className="bg-[#5A5A40] text-white px-8 py-5 rounded-full font-bold flex items-center justify-center gap-3 hover:bg-[#4a4a34] transition-all shadow-xl shadow-[#5A5A40]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => {
+                        if (!paymentMethod) {
+                          paymentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          return;
+                        }
+                        setStep(STEPS.CUSTOMER_INFO);
+                      }}
+                      className={`w-full px-8 py-5 rounded-full font-bold flex items-center justify-center gap-3 transition-all shadow-xl ${
+                        paymentMethod 
+                          ? 'bg-[#5A5A40] text-white hover:bg-[#4a4a34] shadow-[#5A5A40]/20' 
+                          : 'bg-white text-[#5A5A40] border-2 border-[#5A5A40] opacity-80'
+                      }`}
                     >
-                      <ChevronRight size={20} />
-                      Finalizar Compra
+                      {paymentMethod ? (
+                        <>
+                          <ChevronRight size={20} />
+                          Finalizar Compra
+                        </>
+                      ) : (
+                        <>
+                          <CreditCard size={20} />
+                          Escolha o Pagamento Acima
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
