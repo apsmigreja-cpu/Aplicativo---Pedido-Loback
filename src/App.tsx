@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ShoppingBag, 
@@ -43,7 +43,7 @@ const STEPS = {
 };
 
 export default function App() {
-  const [step, setStep] = useState(STEPS.CUSTOMER_INFO);
+  const [step, setStep] = useState(STEPS.PRODUCT_SELECTION);
   const [customer, setCustomer] = useState<CustomerInfo>({
     name: '',
     address: '',
@@ -56,6 +56,8 @@ export default function App() {
     email: '',
     phone: ''
   });
+  const [isCnpjLoading, setIsCnpjLoading] = useState(false);
+  const [cnpjError, setCnpjError] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -63,6 +65,15 @@ export default function App() {
   const [orderNumber, setOrderNumber] = useState<string>('');
   const [observations, setObservations] = useState<string>('');
   const [selectedProductImage, setSelectedProductImage] = useState<Product | null>(null);
+  const [isCnpjFetched, setIsCnpjFetched] = useState(false);
+
+  useEffect(() => {
+    if (step === STEPS.PRODUCT_SELECTION) {
+      setSearchTerm('');
+      setSelectedCategory('Todas');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [step]);
 
   const categories = ['Todas', 'Cuecas', 'Tangas & Fios', 'Calçolas & Calças', 'Conjuntos & Tops', 'Fitness', 'Pijamas & Noite'];
 
@@ -107,18 +118,23 @@ export default function App() {
   };
 
   const isFormValid = useMemo(() => {
+    const cleanCnpj = customer.cnpj.replace(/\D/g, '');
+    const cleanPhone = customer.phone.replace(/\D/g, '');
+    const cleanZip = customer.zip.replace(/\D/g, '');
+
     return (
       customer.name.trim() !== '' &&
       customer.email.trim() !== '' &&
-      customer.phone.length >= 14 && // (99) 9999-9999 or (99) 99999-9999
-      customer.cnpj.length === 18 &&
+      cleanPhone.length >= 10 && 
+      cleanCnpj.length === 14 &&
       customer.ie.trim() !== '' &&
-      customer.zip.length === 9 &&
+      cleanZip.length === 8 &&
       customer.address.trim() !== '' &&
       customer.neighborhood.trim() !== '' &&
-      customer.city.trim() !== ''
+      customer.city.trim() !== '' &&
+      paymentMethod !== ''
     );
-  }, [customer]);
+  }, [customer, paymentMethod]);
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
@@ -161,12 +177,12 @@ export default function App() {
 
   const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    let maskedValue = value.toUpperCase();
+    let maskedValue = value;
 
     if (name === 'phone') maskedValue = maskPhone(value);
     if (name === 'cnpj') maskedValue = maskCNPJ(value);
     if (name === 'zip') maskedValue = maskCEP(value);
-    if (name === 'ie') maskedValue = value.replace(/\D/g, '').slice(0, 14);
+    if (name === 'ie') maskedValue = value.slice(0, 14);
 
     setCustomer(prev => ({ ...prev, [name]: maskedValue }));
   };
@@ -201,6 +217,75 @@ export default function App() {
     });
   };
 
+  const isValidCNPJ = (value: string) => {
+    if (!value) return false;
+    const cnpj = value.replace(/[^\d]+/g, '');
+    if (cnpj.length !== 14) return false;
+    if (/^(\d)\1+$/.test(cnpj)) return false;
+
+    let size = cnpj.length - 2;
+    let numbers = cnpj.substring(0, size);
+    const digits = cnpj.substring(size);
+    let sum = 0;
+    let pos = size - 7;
+    for (let i = size; i >= 1; i--) {
+      sum += parseInt(numbers.charAt(size - i)) * pos--;
+      if (pos < 2) pos = 9;
+    }
+    let result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    if (result !== parseInt(digits.charAt(0))) return false;
+
+    size = size + 1;
+    numbers = cnpj.substring(0, size);
+    sum = 0;
+    pos = size - 7;
+    for (let i = size; i >= 1; i--) {
+      sum += parseInt(numbers.charAt(size - i)) * pos--;
+      if (pos < 2) pos = 9;
+    }
+    result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    if (result !== parseInt(digits.charAt(1))) return false;
+
+    return true;
+  };
+
+  const fetchCNPJData = async (cnpj: string) => {
+    const cleanCnpj = cnpj.replace(/\D/g, '');
+    
+    if (!isValidCNPJ(cleanCnpj)) {
+      setCnpjError('CNPJ Inválido');
+      return;
+    }
+
+    setIsCnpjLoading(true);
+    setCnpjError('');
+    try {
+      const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cleanCnpj}`);
+      if (!response.ok) throw new Error('CNPJ não encontrado');
+      const data = await response.json();
+      
+      setCustomer(prev => ({
+        ...prev,
+        name: data.razao_social || data.nome_fantasia || prev.name,
+        address: `${data.logradouro}${data.numero ? ', ' + data.numero : ''}${data.complemento ? ' - ' + data.complemento : ''}`,
+        neighborhood: data.bairro || prev.neighborhood,
+        city: data.municipio || prev.city,
+        state: data.uf || 'PR',
+        zip: data.cep || prev.zip,
+        email: data.email || prev.email,
+        phone: data.ddd_telefone_1 ? `(${data.ddd_telefone_1.substring(0,2)}) ${data.ddd_telefone_1.substring(2)}` : prev.phone
+      }));
+      setIsCnpjFetched(true);
+    } catch (err) {
+      console.error(err);
+      setCnpjError('Erro ao buscar CNPJ. Verifique o número ou preencha manualmente.');
+      // Permite preencher manualmente se der erro
+      setIsCnpjFetched(true);
+    } finally {
+      setIsCnpjLoading(false);
+    }
+  };
+
   const handleExit = () => {
     if (window.confirm('Deseja realmente sair e encerrar o pedido? Todos os dados serão perdidos.')) {
       setCart([]);
@@ -219,7 +304,8 @@ export default function App() {
         email: '',
         phone: ''
       });
-      setStep(STEPS.CUSTOMER_INFO);
+      setIsCnpjFetched(false);
+      setStep(STEPS.PRODUCT_SELECTION);
       
       // Tenta fechar a janela do navegador de forma robusta
       try {
@@ -240,7 +326,6 @@ export default function App() {
 
   const sendOrder = () => {
     const representativePhone = '5543999526727';
-    const representativeEmail = 'representacaopimenta@gmail.com';
     const newOrderNum = generateOrderNumber();
     setOrderNumber(newOrderNum);
     
@@ -250,13 +335,16 @@ export default function App() {
     message += `${separator}\n\n`;
     
     message += `👤 *DADOS DO CLIENTE*\n`;
-    message += `• Nome: ${customer.name}\n`;
-    message += `• CNPJ/IE: ${customer.cnpj} / ${customer.ie}\n`;
-    message += `• Endereço: ${customer.address}, ${customer.neighborhood}\n`;
-    message += `• Cidade/UF: ${customer.city} - ${customer.state}\n`;
-    message += `• CEP: ${customer.zip}\n`;
-    message += `• Email: ${customer.email}\n`;
-    message += `• Telefone: ${customer.phone}\n\n`;
+    message += `Nome: ${customer.name}\n`;
+    message += `CNPJ: ${customer.cnpj}\n`;
+    message += `IE: ${customer.ie}\n`;
+    message += `Endereço: ${customer.address}\n`;
+    message += `Bairro: ${customer.neighborhood}\n`;
+    message += `Cidade: ${customer.city}\n`;
+    message += `UF: ${customer.state}\n`;
+    message += `CEP: ${customer.zip}\n`;
+    message += `Email: ${customer.email}\n`;
+    message += `Telefone: ${customer.phone}\n\n`;
     
     message += `${separator}\n`;
     message += `🛒 *ITENS DO PEDIDO*\n`;
@@ -306,16 +394,6 @@ export default function App() {
     // WhatsApp
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/${representativePhone}?text=${encodedMessage}`, '_blank');
-
-    // Email
-    const emailSubject = `Pedido #${newOrderNum} - Loback Confecções - ${customer.name}`;
-    const emailBody = message.replace(/\*/g, '').replace(/_/g, ''); // Remove markdown formatting for email
-    const mailtoLink = `mailto:${representativeEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-    
-    // Small delay to ensure WhatsApp window starts opening
-    setTimeout(() => {
-      window.location.href = mailtoLink;
-    }, 500);
 
     setStep(STEPS.SUCCESS);
   };
@@ -369,40 +447,84 @@ export default function App() {
             >
               <div className="text-center space-y-2">
                 <h2 className="font-serif text-3xl font-light">Informações do Cliente</h2>
-                <p className="text-sm opacity-60">Preencha os dados para iniciar o pedido</p>
+                <p className="text-sm opacity-60">Confirme seus dados para finalizar o pedido</p>
               </div>
 
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#1a1a1a]/5 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input label="Nome Completo" name="name" value={customer.name} onChange={handleCustomerChange} icon={<User size={18}/>} required />
-                <Input label="Email" name="email" type="email" value={customer.email} onChange={handleCustomerChange} icon={<Mail size={18}/>} required />
-                <Input label="Telefone" name="phone" placeholder="(00) 00000-0000" value={customer.phone} onChange={handleCustomerChange} icon={<Phone size={18}/>} required />
-                <Input label="CNPJ" name="cnpj" placeholder="00.000.000/0000-00" value={customer.cnpj} onChange={handleCustomerChange} icon={<CreditCard size={18}/>} required />
-                <Input label="Inscrição Estadual" name="ie" type="text" placeholder="Apenas números" value={customer.ie} onChange={handleCustomerChange} icon={<CreditCard size={18}/>} maxLength={14} required />
-                <Input label="CEP" name="zip" placeholder="00000-000" value={customer.zip} onChange={handleCustomerChange} icon={<MapPin size={18}/>} required />
-                <div className="md:col-span-2">
-                  <Input label="Endereço" name="address" value={customer.address} onChange={handleCustomerChange} icon={<MapPin size={18}/>} required />
+                <div className="md:col-span-2 space-y-2">
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1">
+                      <Input 
+                        label="CNPJ" 
+                        name="cnpj" 
+                        placeholder="00.000.000/0000-00" 
+                        value={customer.cnpj} 
+                        onChange={handleCustomerChange} 
+                        icon={<CreditCard size={18}/>} 
+                        required 
+                        disabled={isCnpjLoading}
+                      />
+                    </div>
+                    {!isCnpjFetched ? (
+                      <button
+                        onClick={() => fetchCNPJData(customer.cnpj)}
+                        disabled={isCnpjLoading || customer.cnpj.replace(/\D/g, '').length !== 14}
+                        className="bg-[#5A5A40] text-white px-6 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider hover:bg-[#4a4a34] transition-all disabled:opacity-30 disabled:cursor-not-allowed h-[52px]"
+                      >
+                        {isCnpjLoading ? 'Buscando...' : 'Buscar'}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setIsCnpjFetched(false);
+                          setCnpjError('');
+                        }}
+                        className="bg-white text-[#5A5A40] border border-[#5A5A40]/20 px-6 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider hover:bg-[#f5f5f0] transition-all h-[52px]"
+                      >
+                        Alterar
+                      </button>
+                    )}
+                  </div>
+                  {cnpjError && <p className="text-[10px] text-red-500 font-bold ml-1">{cnpjError}</p>}
                 </div>
-                <Input label="Bairro" name="neighborhood" value={customer.neighborhood} onChange={handleCustomerChange} required />
-                <div className="md:col-span-2">
-                  <Input label="Cidade" name="city" value={customer.city} onChange={handleCustomerChange} required />
-                </div>
+
+                {isCnpjFetched && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6"
+                  >
+                    <Input label="Nome Completo / Razão Social" name="name" value={customer.name} onChange={handleCustomerChange} icon={<User size={18}/>} required />
+                    <Input label="Email" name="email" type="email" value={customer.email} onChange={handleCustomerChange} icon={<Mail size={18}/>} required />
+                    <Input label="Telefone" name="phone" placeholder="(00) 00000-0000" value={customer.phone} onChange={handleCustomerChange} icon={<Phone size={18}/>} required />
+                    <Input label="Inscrição Estadual" name="ie" type="text" placeholder="Apenas números" value={customer.ie} onChange={handleCustomerChange} icon={<CreditCard size={18}/>} maxLength={14} required />
+                    <Input label="CEP" name="zip" placeholder="00000-000" value={customer.zip} onChange={handleCustomerChange} icon={<MapPin size={18}/>} required />
+                    <div className="md:col-span-2">
+                      <Input label="Endereço" name="address" value={customer.address} onChange={handleCustomerChange} icon={<MapPin size={18}/>} required />
+                    </div>
+                    <Input label="Bairro" name="neighborhood" value={customer.neighborhood} onChange={handleCustomerChange} required />
+                    <div className="md:col-span-2">
+                      <Input label="Cidade" name="city" value={customer.city} onChange={handleCustomerChange} required />
+                    </div>
+                  </motion.div>
+                )}
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button
-                  onClick={handleExit}
+                  onClick={() => setStep(STEPS.CART_REVIEW)}
                   className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-[#5A5A40] border border-[#5A5A40]/20 px-12 py-4 rounded-full font-medium hover:bg-[#5A5A40] hover:text-white transition-all shadow-sm"
                 >
-                  <LogOut size={18} />
-                  Sair
+                  <ChevronLeft size={18} />
+                  Voltar ao Carrinho
                 </button>
                 <button
-                  onClick={() => setStep(STEPS.PRODUCT_SELECTION)}
+                  onClick={sendOrder}
                   disabled={!isFormValid}
-                  className="w-full sm:w-auto bg-[#5A5A40] text-white px-12 py-4 rounded-full font-medium flex items-center justify-center gap-2 hover:bg-[#4a4a34] transition-all disabled:opacity-50 disabled:cursor-not-allowed group shadow-lg shadow-[#5A5A40]/20"
+                  className="w-full sm:w-auto bg-[#25D366] text-white px-12 py-4 rounded-full font-bold flex items-center justify-center gap-3 hover:bg-[#128C7E] transition-all shadow-xl shadow-[#25D366]/20 disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
-                  Escolher Produtos
-                  <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  <Send size={20} />
+                  Enviar Pedido
                 </button>
               </div>
             </motion.div>
@@ -426,9 +548,9 @@ export default function App() {
                     >
                       <ChevronLeft size={24} />
                     </button>
-                    <div className="space-y-1">
-                      <h2 className="font-serif text-3xl font-light">Catálogo de Produtos</h2>
-                      <p className="text-sm opacity-60">Selecione os itens e tamanhos desejados (Venda por Dúzia)</p>
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <h2 className="font-serif text-3xl font-light truncate">Catálogo de Produtos</h2>
+                      <p className="text-sm opacity-60 leading-tight break-words">Selecione os itens e tamanhos desejados (Venda por Dúzia e Unidade)</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -646,7 +768,7 @@ export default function App() {
                         <p className="text-[10px] uppercase tracking-wider font-bold opacity-40">Observações do Pedido</p>
                         <textarea
                           value={observations}
-                          onChange={(e) => setObservations(e.target.value.toUpperCase())}
+                          onChange={(e) => setObservations(e.target.value)}
                           placeholder="Caso precise, adicione aqui informações importantes sobre o seu pedido..."
                           className="w-full bg-[#f5f5f0] border border-[#1a1a1a]/5 rounded-2xl p-4 text-sm min-h-[100px] focus:outline-none focus:ring-2 focus:ring-[#5A5A40]/10 focus:bg-white transition-all resize-none"
                         />
@@ -666,17 +788,14 @@ export default function App() {
                       Continuar Comprando
                     </button>
                     <button
-                      onClick={sendOrder}
+                      onClick={() => setStep(STEPS.CUSTOMER_INFO)}
                       disabled={!paymentMethod}
-                      className="bg-[#25D366] text-white px-8 py-5 rounded-full font-bold flex items-center justify-center gap-3 hover:bg-[#128C7E] transition-all shadow-xl shadow-[#25D366]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="bg-[#5A5A40] text-white px-8 py-5 rounded-full font-bold flex items-center justify-center gap-3 hover:bg-[#4a4a34] transition-all shadow-xl shadow-[#5A5A40]/20 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Send size={20} />
-                      Finalizar e Enviar
+                      <ChevronRight size={20} />
+                      Finalizar Compra
                     </button>
                   </div>
-                  <p className="text-xs opacity-40 text-center max-w-xs">
-                    {!paymentMethod ? 'Selecione uma forma de pagamento para finalizar.' : 'Ao clicar, o pedido será enviado via WhatsApp e E-mail.'}
-                  </p>
                 </div>
               )}
             </motion.div>
@@ -696,7 +815,7 @@ export default function App() {
                 <div className="space-y-2">
                   <h2 className="font-serif text-4xl font-bold">Pedido Enviado!</h2>
                   <p className="text-xl font-medium text-[#5A5A40]">Número do Pedido: #{orderNumber}</p>
-                  <p className="opacity-60">Seu pedido foi processado e enviado via WhatsApp e E-mail.</p>
+                  <p className="opacity-60">Seu pedido foi processado e enviado via WhatsApp.</p>
                 </div>
               </div>
 
@@ -751,14 +870,14 @@ export default function App() {
                       address: '',
                       neighborhood: '',
                       city: '',
-                      state: '',
+                      state: 'PR',
                       zip: '',
                       cnpj: '',
                       ie: '',
                       email: '',
                       phone: ''
                     });
-                    setStep(STEPS.CUSTOMER_INFO);
+                    setStep(STEPS.PRODUCT_SELECTION);
                   }}
                   className="w-full sm:w-auto bg-[#5A5A40] text-white px-12 py-4 rounded-full font-medium hover:bg-[#4a4a34] transition-all shadow-lg shadow-[#5A5A40]/20"
                 >
