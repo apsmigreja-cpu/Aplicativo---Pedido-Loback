@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ShoppingBag, 
@@ -66,6 +66,7 @@ export default function App() {
   const [observations, setObservations] = useState<string>('');
   const [selectedProductImage, setSelectedProductImage] = useState<Product | null>(null);
   const [isCnpjFetched, setIsCnpjFetched] = useState(false);
+  const cnpjInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (step === STEPS.PRODUCT_SELECTION) {
@@ -254,6 +255,10 @@ export default function App() {
     
     if (!isValidCNPJ(cleanCnpj)) {
       setCnpjError('CNPJ Inválido');
+      setCustomer(prev => ({ ...prev, cnpj: '' }));
+      setTimeout(() => {
+        cnpjInputRef.current?.focus();
+      }, 100);
       return;
     }
 
@@ -455,6 +460,7 @@ export default function App() {
                   <div className="flex gap-2 items-end">
                     <div className="flex-1">
                       <Input 
+                        ref={cnpjInputRef}
                         label="CNPJ" 
                         name="cnpj" 
                         placeholder="00.000.000/0000-00" 
@@ -1009,7 +1015,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   required?: boolean;
 }
 
-const Input: React.FC<InputProps> = ({ label, icon, required, ...props }) => {
+const Input = React.forwardRef<HTMLInputElement, InputProps>(({ label, icon, required, ...props }, ref) => {
   return (
     <div className="space-y-1.5">
       <label className="text-[10px] uppercase tracking-wider font-bold opacity-40 ml-1">
@@ -1019,13 +1025,16 @@ const Input: React.FC<InputProps> = ({ label, icon, required, ...props }) => {
         {icon && <div className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30">{icon}</div>}
         <input
           {...props}
+          ref={ref}
           required={required}
           className={`w-full bg-[#f5f5f0] border border-[#1a1a1a]/5 rounded-2xl py-3 ${icon ? 'pl-11' : 'pl-4'} pr-4 focus:outline-none focus:ring-2 focus:ring-[#5A5A40]/10 focus:bg-white transition-all`}
         />
       </div>
     </div>
   );
-};
+});
+
+Input.displayName = 'Input';
 
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
