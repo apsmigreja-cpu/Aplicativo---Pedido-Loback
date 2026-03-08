@@ -899,6 +899,8 @@ export default function App() {
                     setPaymentMethod('');
                     setOrderNumber('');
                     setObservations('');
+                    setIsCnpjFetched(false);
+                    setCnpjError('');
                     setCustomer({
                       name: '',
                       address: '',
