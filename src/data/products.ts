@@ -17,7 +17,7 @@ export const products: Product[] = [
   { ref: "023", description: "CALÇOLINHA INF. ALG.", sizes: ["P", "M", "G", "GG"], price: 43.20, imageUrl: "https://i.postimg.cc/63tmjt9C/REF023.jpg"  },
   { ref: "024", description: "CUECA BOXER FEMININA AD", sizes: ["P", "M", "G", "GG"], price: 88.20, imageUrl: "https://i.postimg.cc/V6mVGmYW/REF024.jpg"  },
   { ref: "025", description: "TANGA C/ PASSA FITA", sizes: ["P", "M", "G", "GG"], price: 63.60, imageUrl: "https://i.postimg.cc/qR45b4kL/REF025.jpg"  },
-  { ref: "027", description: "CALÇOLA ALGODÃO", sizes: ["M", "G", "GG"], price: 57.20, imageUrl: "https://i.postimg.cc/nzpPRpFZ/REF027.jpg"  },
+  { ref: "027", description: "CALÇOLA ALGODÃO", sizes: ["M", "G", "GG"], price: 55.20, imageUrl: "https://i.postimg.cc/nzpPRpFZ/REF027.jpg"  },
   { ref: "029", description: "CALÇOLINHA FRU-FRU", sizes: ["P", "M", "G", "GG"], price: 46.80, imageUrl: "https://i.postimg.cc/d1wxHwsP/REF029.jpg"  },
   { ref: "030", description: "CUECA AD. BOXER MICROFIBRA - PVC", sizes: ["P", "M", "G", "GG"], price: 108.96, dozenPrice: 108.96, unitPrice: 9.08, imageUrl: "https://i.postimg.cc/0QnHhFjg/REF030.jpg"  },
   { ref: "031", description: "CUECA BOXER INF COTTON CAIO", sizes: ["P", "M", "G", "GG"], price: 92.06, imageUrl: "https://i.postimg.cc/DZ6YRH03/REF031.jpg"  },
