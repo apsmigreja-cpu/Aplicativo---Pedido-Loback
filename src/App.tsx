@@ -415,14 +415,20 @@ export default function App() {
       {/* Header */}
       <header className="bg-white border-b border-[#1a1a1a]/10 sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 border border-[#5A5A40]/20 rounded-full flex items-center justify-center text-[#5A5A40] font-serif font-bold text-xl">
+          <div 
+            className="flex items-center gap-4 cursor-pointer group"
+            onClick={() => {
+              setStep(STEPS.PRODUCT_SELECTION);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          >
+            <div className="w-12 h-12 border border-[#5A5A40]/20 rounded-full flex items-center justify-center text-[#5A5A40] font-serif font-bold text-xl group-hover:bg-[#5A5A40]/5 transition-colors">
               PP
             </div>
             <div className="flex items-center gap-6">
               <div className="flex flex-col">
                 <p className="text-[10px] uppercase tracking-[0.2em] opacity-40 leading-none mb-0.5">Representante</p>
-                <h2 className="text-lg font-bold tracking-tight">Pedro Pimenta</h2>
+                <h2 className="text-lg font-bold tracking-tight group-hover:text-[#5A5A40] transition-colors">Pedro Pimenta</h2>
               </div>
               <div className="h-6 w-px bg-[#1a1a1a]/10 hidden sm:block" />
               <p className="text-[11px] font-medium opacity-60 hidden sm:block">
