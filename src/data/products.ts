@@ -35,6 +35,7 @@ export const products: Product[] = [
   { ref: "078", description: "CALÇOLA ALGODÃO PLUS SIZE", sizes: ["50", "52", "54"], price: 66.00, imageUrl: "https://i.postimg.cc/SRt1x9WK/REF078.jpg" },
   { ref: "079", description: "CUECA BOXER PLUS SIZE = PVC", sizes: ["50", "52", "54"], price: 169.20, imageUrl: "https://i.postimg.cc/ZYfMcGXr/REF079.jpg" },
   { ref: "080", description: "CUECA EXPOSTO PLUS SIZE - PVC", sizes: ["50", "52", "54"], price: 90.00, imageUrl: "https://i.postimg.cc/L4ybTcGk/REF080.jpg" },
+  { ref: "081", description: "CUECA AD. BOXER MICROFIBRA PLUS SIZE", sizes: ["48", "50", "52", "54"], price: 150.00, imageUrl: "https://i.postimg.cc/9QwN3vJk/REF081.png" },
   { ref: "083", description: "CUECA BOXER JUVENIL MASCULINA-PVC", sizes: ["P", "M", "G", "GG"], price: 108.00, imageUrl: "https://i.postimg.cc/RCPDRk2G/REF083.jpg" },
   { ref: "088", description: "CUECA BOXER INFANTIL - PVC", sizes: ["P", "M", "G", "GG"], price: 66.00, imageUrl: "https://i.postimg.cc/2jHKwsg0/REF088.jpg" },
   { ref: "090", description: "CUECA BOXER AD. ELAST. EXP . LOBACK", sizes: ["P", "M", "G", "GG"], price: 126.00, imageUrl: "https://i.postimg.cc/qBm5LPWY/REF090.jpg" },
